@@ -3,6 +3,8 @@ package services
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/duke-git/lancet/v2/convertor"
 	"github.com/duke-git/lancet/v2/datetime"
 	"github.com/emvi/logbuch"
@@ -13,7 +15,6 @@ import (
 	"github.com/muety/wakapi/utils"
 	"github.com/patrickmn/go-cache"
 	uuid "github.com/satori/go.uuid"
-	"time"
 )
 
 type UserService struct {
@@ -173,7 +174,7 @@ func (srv *UserService) Count() (int64, error) {
 
 func (srv *UserService) CreateOrGet(signup *models.Signup, isAdmin bool) (*models.User, bool, error) {
 	u := &models.User{
-		ID:        signup.Username,
+		ID:        uuid.NewV4().String(),
 		ApiKey:    uuid.NewV4().String(),
 		Email:     signup.Email,
 		Location:  signup.Location,
