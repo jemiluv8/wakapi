@@ -2,6 +2,10 @@ package services
 
 import (
 	"errors"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/duke-git/lancet/v2/datetime"
 	"github.com/emvi/logbuch"
 	"github.com/leandro-lugaresi/hub"
@@ -10,9 +14,6 @@ import (
 	"github.com/muety/wakapi/models/types"
 	"github.com/muety/wakapi/repositories"
 	"github.com/patrickmn/go-cache"
-	"sort"
-	"strings"
-	"time"
 )
 
 type SummaryService struct {

@@ -16,6 +16,7 @@ import (
 	"github.com/emvi/logbuch"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/lpar/gzipped/v2"
 	httpSwagger "github.com/swaggo/http-swagger"
 	_ "gorm.io/driver/mysql"
@@ -234,7 +235,7 @@ func main() {
 	wakatimeV1StatusBarHandler := wtV1Routes.NewStatusBarHandler(userService, summaryService)
 	wakatimeV1AllHandler := wtV1Routes.NewAllTimeHandler(userService, summaryService)
 	wakatimeV1SummariesHandler := wtV1Routes.NewSummariesHandler(userService, summaryService)
-	wakatimeV1GoalsHandler := wtV1Routes.NewGoalsApiHandler(db, goalService, userService)
+	wakatimeV1GoalsHandler := wtV1Routes.NewGoalsApiHandler(db, goalService, userService, summaryService)
 	wakatimeV1StatsHandler := wtV1Routes.NewStatsHandler(userService, summaryService)
 	wakatimeV1UsersHandler := wtV1Routes.NewUsersHandler(userService, heartbeatService)
 	wakatimeV1ProjectsHandler := wtV1Routes.NewProjectsHandler(userService, heartbeatService)
@@ -255,8 +256,21 @@ func main() {
 	// Other Handlers
 	relayHandler := relay.NewRelayHandler()
 
+	corsSetup := func(r *chi.Mux) {
+		r.Use(cors.Handler(cors.Options{
+			AllowedOrigins:   []string{"https://*", "http://*"},
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "Token"},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: false,
+			MaxAge:           300,
+		}))
+	}
+
 	// Setup Routing
 	router := chi.NewRouter()
+	corsSetup(router)
+
 	router.Use(
 		middleware.CleanPath,
 		middleware.StripSlashes,
@@ -276,9 +290,11 @@ func main() {
 
 	// Setup Sub Routers
 	rootRouter := chi.NewRouter()
+	corsSetup(rootRouter)
 	rootRouter.Use(middlewares.NewSecurityMiddleware())
 
 	apiRouter := chi.NewRouter()
+	corsSetup(apiRouter)
 
 	// Hook sub routers
 	router.Mount("/", rootRouter)
