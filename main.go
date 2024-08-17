@@ -70,6 +70,7 @@ var (
 	diagnosticsRepository     repositories.IDiagnosticsRepository
 	metricsRepository         *repositories.MetricsRepository
 	goalRepository            repositories.IGoalRepository
+	oauthUserRepository       repositories.IOauthUserRepository
 )
 
 var (
@@ -90,6 +91,7 @@ var (
 	housekeepingService    services.IHousekeepingService
 	miscService            services.IMiscService
 	goalService            services.IGoalService
+	oauthUserService       services.IUserOauthService
 )
 
 // TODO: Refactor entire project to be structured after business domains
@@ -179,6 +181,7 @@ func main() {
 	projectLabelRepository = repositories.NewProjectLabelRepository(db)
 	summaryRepository = repositories.NewSummaryRepository(db)
 	goalRepository = repositories.NewGoalRepository(db)
+	oauthUserRepository = repositories.NewUserOauthRepository(db)
 	leaderboardRepository = repositories.NewLeaderboardRepository(db)
 	keyValueRepository = repositories.NewKeyValueRepository(db)
 	diagnosticsRepository = repositories.NewDiagnosticsRepository(db)
@@ -194,6 +197,7 @@ func main() {
 	durationService = services.NewDurationService(heartbeatService)
 	summaryService = services.NewSummaryService(summaryRepository, durationService, aliasService, projectLabelService)
 	goalService = services.NewGoalService(goalRepository)
+	oauthUserService = services.NewUserOauthService(oauthUserRepository)
 	aggregationService = services.NewAggregationService(userService, summaryService, heartbeatService)
 	keyValueService = services.NewKeyValueService(keyValueRepository)
 	reportService = services.NewReportService(summaryService, userService, mailService)
@@ -220,7 +224,7 @@ func main() {
 	routes.Init()
 
 	// API Handlers
-	authApiHandler := api.NewAuthApiHandler(db, userService)
+	authApiHandler := api.NewAuthApiHandler(db, userService, oauthUserService)
 	settingsApiHandler := api.NewSettingsHandler(userService)
 	healthApiHandler := api.NewHealthApiHandler(db)
 	heartbeatApiHandler := api.NewHeartbeatApiHandler(userService, heartbeatService, languageMappingService)
