@@ -71,6 +71,7 @@ var (
 	metricsRepository         *repositories.MetricsRepository
 	goalRepository            repositories.IGoalRepository
 	oauthUserRepository       repositories.IOauthUserRepository
+	userAgentPluginRepository repositories.PluginUserAgentRepository
 )
 
 var (
@@ -92,6 +93,7 @@ var (
 	miscService            services.IMiscService
 	goalService            services.IGoalService
 	oauthUserService       services.IUserOauthService
+	userAgentPluginService services.IPluginUserAgentService
 )
 
 // TODO: Refactor entire project to be structured after business domains
@@ -177,6 +179,7 @@ func main() {
 	aliasRepository = repositories.NewAliasRepository(db)
 	heartbeatRepository = repositories.NewHeartbeatRepository(db)
 	userRepository = repositories.NewUserRepository(db)
+	userAgentPluginRepository = repositories.NewPluginUserAgentRepository(db)
 	languageMappingRepository = repositories.NewLanguageMappingRepository(db)
 	projectLabelRepository = repositories.NewProjectLabelRepository(db)
 	summaryRepository = repositories.NewSummaryRepository(db)
@@ -191,6 +194,7 @@ func main() {
 	mailService = mail.NewMailService()
 	aliasService = services.NewAliasService(aliasRepository)
 	userService = services.NewUserService(mailService, userRepository)
+	userAgentPluginService = services.NewPluginUserAgentService(&userAgentPluginRepository)
 	languageMappingService = services.NewLanguageMappingService(languageMappingRepository)
 	projectLabelService = services.NewProjectLabelService(projectLabelRepository)
 	heartbeatService = services.NewHeartbeatService(heartbeatRepository, languageMappingService)
@@ -227,7 +231,7 @@ func main() {
 	authApiHandler := api.NewAuthApiHandler(db, userService, oauthUserService)
 	settingsApiHandler := api.NewSettingsHandler(userService)
 	healthApiHandler := api.NewHealthApiHandler(db)
-	heartbeatApiHandler := api.NewHeartbeatApiHandler(userService, heartbeatService, languageMappingService)
+	heartbeatApiHandler := api.NewHeartbeatApiHandler(userService, heartbeatService, languageMappingService, userAgentPluginService)
 	summaryApiHandler := api.NewSummaryApiHandler(userService, summaryService)
 	metricsHandler := api.NewMetricsHandler(userService, summaryService, heartbeatService, leaderboardService, keyValueService, metricsRepository)
 	diagnosticsHandler := api.NewDiagnosticsApiHandler(userService, diagnosticsService)
